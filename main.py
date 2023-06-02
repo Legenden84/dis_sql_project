@@ -4,7 +4,7 @@ import dash_bootstrap_components as dbc
 import pandas as pd
 import sqlite3
 
-from dash import dash, html, dcc, Output, Input, State
+from dash import dash, html, dcc, Output, Input, State, no_update
 from dash.exceptions import PreventUpdate
 
 
@@ -12,8 +12,12 @@ from dash.exceptions import PreventUpdate
 df1 = pd.read_csv("datasets/games.csv")
 df2 = pd.read_csv("datasets/video_game_films.csv")
 
+# dropping duplicate entries
+df1 = df1.drop_duplicates(subset=["Title"])
+df2 = df2.drop_duplicates(subset=["Title"])
+
 # Remove rows where Release Date is "releases on TBD"
-df1 = df1.drop(df1[df1['Release Date'] == 'releases on TBD'].index)
+df1 = df1.drop(df1[df1["Release Date"] == "releases on TBD"].index)
 
 # dropping deprecated column
 df1.drop("Unnamed: 0", axis=1, inplace=True)
@@ -32,7 +36,7 @@ df1.to_sql("games", conn, if_exists="replace", index=False)
 df2.to_sql("movies", conn, if_exists="replace", index=False)
 
 df_sql_games = pd.read_sql_query("SELECT * FROM games", conn)
-df_sql_movie = pd.read_sql_query("SELECT * FROM movies", conn)
+df_sql_movies = pd.read_sql_query("SELECT * FROM movies", conn)
 
 conn.close()
 
@@ -59,7 +63,7 @@ app.layout = dbc.Container(
                             [
                                 dcc.Textarea(
                                     id="textarea",
-                                    value="Search...",
+                                    placeholder="Search...",
                                 ),
                                 html.Button(
                                     "Search",
@@ -94,8 +98,8 @@ app.layout = dbc.Container(
                         html.H1("Film Adaptations of Video Games"),
                         dag.AgGrid(
                             id="ag_grid-2",
-                            columnDefs=[{"field": col} for col in df_sql_movie.columns],
-                            rowData=df_sql_movie.to_dict("records"),
+                            columnDefs=[{"field": col} for col in df_sql_movies.columns],
+                            rowData=df_sql_movies.to_dict("records"),
                             defaultColDef={
                                 "minWidth": 100,
                                 "editable": True,
@@ -140,11 +144,28 @@ app.layout = dbc.Container(
 )
 def sql_query(n_clicks, textarea):
     conn = sqlite3.connect("database/database.db")
-    df_sql_games = pd.read_sql_query(f"SELECT title FROM games WHERE title LIKE '%{textarea}'", conn)
-    query = df_sql_games.to_dict("records")
-    print("df_sql_games: ", df_sql_games)
+    conn.execute(
+        '''
+        DROP TABLE IF EXISTS query_result
+        '''
+    )
+    conn.execute(
+        '''
+        CREATE TABLE query_result (
+            Title TEXT
+            Release Date DATETIME
+        )
+        '''
+    )
+    df_sql_games = pd.read_sql_query(f"SELECT Title FROM games WHERE Title LIKE '%{textarea}%'", conn)
+    df_sql_movies = pd.read_sql_query(f"SELECT Title FROM movies WHERE Title LIKE '%{textarea}%'", conn)
 
-    columnDefs = [{"field": col} for col in df_sql_games.columns]
+    if df_sql_games.empty:
+        no_update, no_update
+
+    query = df_sql_movies.to_dict("records")
+
+    columnDefs = [{"field": col} for col in df_sql_movies.columns]
     conn.close()
 
     return query, columnDefs
