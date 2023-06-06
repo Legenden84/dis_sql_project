@@ -57,22 +57,41 @@ app.layout = dbc.Container(
             [
                 html.Div(
                     [
-                        html.H1("Search"),
                         html.Div(
                             [
-                                dcc.Textarea(
-                                    id="textarea",
-                                    placeholder="Search...",
+                                html.H1("Search"),
+                                html.Div(
+                                    [
+                                        dcc.Textarea(
+                                            id="textarea",
+                                            placeholder="Search...",
+                                        ),
+                                        html.Button(
+                                            "Search",
+                                            id="sql-search",
+                                            n_clicks=0,
+                                        )
+                                    ]
                                 ),
-                                html.Button(
-                                    "Search",
-                                    id="sql-search",
-                                    n_clicks=0,
-                                )
                             ]
                         ),
-                    ]
-                )
+                        html.Div(
+                            [
+                                html.H1("Search options"),
+                                dcc.Dropdown(
+                                    id="dropdown",
+                                    options=[
+                                        {"label": "Search by Titel", "value": "title"},
+                                        {"label": "Search by Year", "value": "year"},
+                                        {"label": "Search by Developer", "value": "developer"},
+                                    ],
+                                    value=[]
+                                )
+                            ]
+                        )
+                    ],
+                    style={"display": "flex", "justify-content": "space-between"}
+                ),
             ]
         ),
         dbc.Row(
@@ -166,23 +185,36 @@ app.layout = dbc.Container(
         Output(component_id="ag-movies", component_property="columnDefs"),
     ],
     Input(component_id="sql-search", component_property="n_clicks"),
-    State(component_id="textarea", component_property="value")
+    [
+        State(component_id="textarea", component_property="value"),
+        State(component_id="dropdown", component_property="value")
+    ]
 )
-def sql_query(n_clicks, textarea):
+def sql_query(n_clicks, textarea, options):
+    if n_clicks < 1:
+        raise PreventUpdate
+
     conn = sqlite3.connect("database/database.db")
 
-    df_sql_games = pd.read_sql_query(f"SELECT * FROM games WHERE Title LIKE '%{textarea}%' ORDER BY [Title] ASC", conn)
-    df_sql_movies = pd.read_sql_query(f"SELECT * FROM movies WHERE Title LIKE '%{textarea}%' ORDER BY [Title] ASC", conn)
+    if options == "title":
+        df_sql_games = pd.read_sql_query(f"SELECT * FROM games WHERE Title LIKE '%{textarea}%' ORDER BY [Title] ASC", conn)
+        df_sql_movies = pd.read_sql_query(f"SELECT * FROM movies WHERE Title LIKE '%{textarea}%' ORDER BY [Title] ASC", conn)
 
-    print(df_sql_games)
-    print([col for col in df_sql_games.columns])
+        rowData_1 = df_sql_games.to_dict("records")
+        columnDefs_1 = [{"field": col, "minWidth": 200} if col == "Title" else {"field": col} for col in df_sql_games.columns]
 
-    rowData_1 = df_sql_games.to_dict("records")
-    columnDefs_1 = [{"field": col, "minWidth": 200} if col == "Title" else {"field": col} for col in df_sql_games.columns]
+        rowData_2 = df_sql_movies.to_dict("records")
+        columnDefs_2 = [{"field": col, "minWidth": 200} if col == "Title" else {"field": col} for col in df_sql_movies.columns]
 
-    rowData_2 = df_sql_movies.to_dict("records")
-    columnDefs_2 = [{"field": col} for col in df_sql_movies.columns]
-    columnDefs_2 = [{"field": col, "minWidth": 200} if col == "Title" else {"field": col} for col in df_sql_movies.columns]
+    if options == "year":
+        df_sql_games = pd.read_sql_query(f"SELECT * FROM games WHERE Title LIKE '%{textarea}%' ORDER BY [Title] ASC", conn)
+        df_sql_movies = pd.read_sql_query(f"SELECT * FROM movies WHERE Title LIKE '%{textarea}%' ORDER BY [Title] ASC", conn)
+
+        rowData_1 = df_sql_games.to_dict("records")
+        columnDefs_1 = [{"field": col, "minWidth": 200} if col == "Title" else {"field": col} for col in df_sql_games.columns]
+
+        rowData_2 = df_sql_movies.to_dict("records")
+        columnDefs_2 = [{"field": col, "minWidth": 200} if col == "Title" else {"field": col} for col in df_sql_movies.columns]
 
     conn.close()
 
