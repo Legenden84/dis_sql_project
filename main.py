@@ -55,7 +55,6 @@ app.layout = dbc.Container(
     [
         dbc.Row(
             [
-                dbc.Button("SQL Query", id="load-btn", n_clicks=0,),
                 html.Div(
                     [
                         html.H1("Search"),
@@ -80,20 +79,46 @@ app.layout = dbc.Container(
             [
                 dbc.Col(
                     [
-                        html.H1("Video game movies"),
-                        dag.AgGrid(
-                            id="ag-sql",
-                            columnDefs=[],
-                            rowData=[],
-                            defaultColDef={
-                                "minWidth": 100,
-                                "editable": True,
-                                "resizable": True,
-                                "flex": 1,
-                                "wrapHeaderText": True,
-                                "filter": True,
-                                "floatingFilter": True
-                            }
+                        html.Div(
+                            [
+                                html.Div(
+                                    [
+                                        html.H1("Video Games"),
+                                        dag.AgGrid(
+                                            id="ag-games",
+                                            columnDefs=[],
+                                            rowData=[],
+                                            defaultColDef={
+                                                "minWidth": 100,
+                                                "editable": True,
+                                                "resizable": True,
+                                                "flex": 1,
+                                                "wrapHeaderText": True,
+                                            }
+                                        ),
+                                    ],
+                                    style={"width": "48%", "margin-left": "1%"}
+                                ),
+                                html.Div(
+                                    [
+                                        html.H1("Video Game Adaptations"),
+                                        dag.AgGrid(
+                                            id="ag-movies",
+                                            columnDefs=[],
+                                            rowData=[],
+                                            defaultColDef={
+                                                "minWidth": 100,
+                                                "editable": True,
+                                                "resizable": True,
+                                                "flex": 1,
+                                                "wrapHeaderText": True,
+                                            }
+                                        ),
+                                    ],
+                                    style={"width": "48%", "margin-right": "1%"}
+                                ),
+                            ],
+                            style={"display": "flex", "justify-content": "space-between", "width": "100%"}
                         ),
                         html.H1("Popular Video Games 1980 - 2023, and movie adaptions"),
                         dag.AgGrid(
@@ -135,39 +160,38 @@ app.layout = dbc.Container(
 # callbacks
 @app.callback(
     [
-        Output(component_id="ag-sql", component_property="rowData"),
-        Output(component_id="ag-sql", component_property="columnDefs"),
+        Output(component_id="ag-games", component_property="rowData"),
+        Output(component_id="ag-games", component_property="columnDefs"),
+        Output(component_id="ag-movies", component_property="rowData"),
+        Output(component_id="ag-movies", component_property="columnDefs"),
     ],
     Input(component_id="sql-search", component_property="n_clicks"),
     State(component_id="textarea", component_property="value")
 )
 def sql_query(n_clicks, textarea):
     conn = sqlite3.connect("database/database.db")
-    conn.execute(
-        '''
-        DROP TABLE IF EXISTS query_result
-        '''
-    )
-    conn.execute(
-        '''
-        CREATE TABLE query_result (
-            Title TEXT
-            Release_Date DATETIME
-        )
-        '''
-    )
-    df_sql_games = pd.read_sql_query(f"SELECT Title FROM games WHERE Title LIKE '%{textarea}%'", conn)
+
+    df_sql_games = pd.read_sql_query(f"SELECT * FROM games WHERE Title LIKE '%{textarea}%'", conn)
     df_sql_movies = pd.read_sql_query(f"SELECT * FROM movies WHERE Title LIKE '%{textarea}%' ORDER BY [Release Date] DESC", conn)
 
+    print(df_sql_games)
+    print([col for col in df_sql_games.columns])
+
     if df_sql_games.empty:
-        no_update, no_update
+        no_update, no_update, no_update, no_update
 
-    query = df_sql_movies.to_dict("records")
+    if df_sql_movies.empty:
+        no_update, no_update, no_update, no_update
 
-    columnDefs = [{"field": col} for col in df_sql_movies.columns]
+    rowData_1 = df_sql_games.to_dict("records")
+    columnDefs_1 = [{"Field": col} for col in df_sql_games.columns]
+
+    rowData_2 = df_sql_movies.to_dict("records")
+    columnDefs_2 = [{"field": col} for col in df_sql_movies.columns]
+
     conn.close()
 
-    return query, columnDefs
+    return rowData_1, columnDefs_1, rowData_2, columnDefs_2
 
 if __name__ == '__main__':
     app.run_server(debug=True)
