@@ -12,7 +12,7 @@ from dash.exceptions import PreventUpdate
 df1 = pd.read_csv("datasets/games.csv")
 df2 = pd.read_csv("datasets/video_game_films.csv")
 
-# dropping duplicate entries
+# dropping duplicate entries by title
 df1 = df1.drop_duplicates(subset=["Title"])
 df2 = df2.drop_duplicates(subset=["Title"])
 
@@ -80,6 +80,21 @@ app.layout = dbc.Container(
             [
                 dbc.Col(
                     [
+                        html.H1("Video game movies"),
+                        dag.AgGrid(
+                            id="ag-sql",
+                            columnDefs=[],
+                            rowData=[],
+                            defaultColDef={
+                                "minWidth": 100,
+                                "editable": True,
+                                "resizable": True,
+                                "flex": 1,
+                                "wrapHeaderText": True,
+                                "filter": True,
+                                "floatingFilter": True
+                            }
+                        ),
                         html.H1("Popular Video Games 1980 - 2023, and movie adaptions"),
                         dag.AgGrid(
                             id="ag_grid",
@@ -110,22 +125,6 @@ app.layout = dbc.Container(
                                 "floatingFilter": True
                             }
                         ),
-                        html.H1("SQL QUERY"),
-                        dag.AgGrid(
-                            id="ag-sql",
-                            columnDefs=[],
-                            rowData=[],
-                            defaultColDef={
-                                "minWidth": 100,
-                                "editable": True,
-                                "resizable": True,
-                                "flex": 1,
-                                "wrapHeaderText": True,
-                                "filter": True,
-                                "floatingFilter": True
-                            }
-                        ),
-
                     ]
                 )
             ]
@@ -153,12 +152,12 @@ def sql_query(n_clicks, textarea):
         '''
         CREATE TABLE query_result (
             Title TEXT
-            Release Date DATETIME
+            Release_Date DATETIME
         )
         '''
     )
     df_sql_games = pd.read_sql_query(f"SELECT Title FROM games WHERE Title LIKE '%{textarea}%'", conn)
-    df_sql_movies = pd.read_sql_query(f"SELECT Title FROM movies WHERE Title LIKE '%{textarea}%'", conn)
+    df_sql_movies = pd.read_sql_query(f"SELECT * FROM movies WHERE Title LIKE '%{textarea}%' ORDER BY [Release Date] DESC", conn)
 
     if df_sql_games.empty:
         no_update, no_update
