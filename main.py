@@ -171,17 +171,11 @@ app.layout = dbc.Container(
 def sql_query(n_clicks, textarea):
     conn = sqlite3.connect("database/database.db")
 
-    df_sql_games = pd.read_sql_query(f"SELECT * FROM games WHERE Title LIKE '%{textarea}%'", conn)
-    df_sql_movies = pd.read_sql_query(f"SELECT * FROM movies WHERE Title LIKE '%{textarea}%' ORDER BY [Release Date] DESC", conn)
+    df_sql_games = pd.read_sql_query(f"SELECT * FROM games WHERE Title LIKE '%{textarea}%' ORDER BY [Title] ASC", conn)
+    df_sql_movies = pd.read_sql_query(f"SELECT * FROM movies WHERE Title LIKE '%{textarea}%' ORDER BY [Title] ASC", conn)
 
     print(df_sql_games)
     print([col for col in df_sql_games.columns])
-
-    if df_sql_games.empty:
-        no_update, no_update, no_update, no_update
-
-    if df_sql_movies.empty:
-        no_update, no_update, no_update, no_update
 
     rowData_1 = df_sql_games.to_dict("records")
     columnDefs_1 = [{"field": col, "minWidth": 200} if col == "Title" else {"field": col} for col in df_sql_games.columns]
