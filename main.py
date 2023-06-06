@@ -184,10 +184,11 @@ def sql_query(n_clicks, textarea):
         no_update, no_update, no_update, no_update
 
     rowData_1 = df_sql_games.to_dict("records")
-    columnDefs_1 = [{"Field": col} for col in df_sql_games.columns]
+    columnDefs_1 = [{"field": col, "minWidth": 200} if col == "Title" else {"field": col} for col in df_sql_games.columns]
 
     rowData_2 = df_sql_movies.to_dict("records")
     columnDefs_2 = [{"field": col} for col in df_sql_movies.columns]
+    columnDefs_2 = [{"field": col, "minWidth": 200} if col == "Title" else {"field": col} for col in df_sql_movies.columns]
 
     conn.close()
 
