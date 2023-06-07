@@ -207,8 +207,9 @@ def sql_query(n_clicks, textarea, options):
         columnDefs_2 = [{"field": col, "minWidth": 200} if col == "Title" else {"field": col} for col in df_sql_movies.columns]
 
     if options == "year":
-        df_sql_games = pd.read_sql_query(f"SELECT * FROM games WHERE Title LIKE '%{textarea}%' ORDER BY [Title] ASC", conn)
-        df_sql_movies = pd.read_sql_query(f"SELECT * FROM movies WHERE Title LIKE '%{textarea}%' ORDER BY [Title] ASC", conn)
+
+        df_sql_games = pd.read_sql_query(f"SELECT * FROM games WHERE CAST(SUBSTR([Release Date], 1, 4) AS integer) == '{textarea}' ORDER BY [Release Date] ASC", conn)
+        df_sql_movies = pd.read_sql_query(f"SELECT * FROM movies WHERE CAST(SUBSTR([Release Date], 1, 4) AS integer) == '{textarea}' ORDER BY [Release Date] ASC", conn)
 
         rowData_1 = df_sql_games.to_dict("records")
         columnDefs_1 = [{"field": col, "minWidth": 200} if col == "Title" else {"field": col} for col in df_sql_games.columns]
