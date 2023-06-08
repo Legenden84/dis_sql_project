@@ -81,11 +81,10 @@ app.layout = dbc.Container(
                                 dcc.Dropdown(
                                     id="dropdown",
                                     options=[
-                                        {"label": "Search by Titel", "value": "title"},
+                                        {"label": "Search by Title", "value": "title"},
                                         {"label": "Search by Year", "value": "year"},
-                                        {"label": "Search by Developer", "value": "developer"},
                                     ],
-                                    value=[]
+                                    value="title"
                                 )
                             ]
                         )
