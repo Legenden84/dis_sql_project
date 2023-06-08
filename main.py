@@ -73,7 +73,8 @@ app.layout = dbc.Container(
                                         )
                                     ]
                                 ),
-                            ]
+                            ],
+                            style={"margin-left": "1%", "margin-right": "1%"}
                         ),
                         html.Div(
                             [
@@ -86,7 +87,8 @@ app.layout = dbc.Container(
                                     ],
                                     value="title"
                                 )
-                            ]
+                            ],
+                            style={"margin-left": "1%", "margin-right": "1%"}
                         )
                     ],
                     style={"display": "flex", "justify-content": "space-between"}
@@ -138,35 +140,40 @@ app.layout = dbc.Container(
                             ],
                             style={"display": "flex", "justify-content": "space-between", "width": "100%"}
                         ),
-                        html.H1("Popular Video Games 1980 - 2023, and movie adaptions"),
-                        dag.AgGrid(
-                            id="ag_grid",
-                            columnDefs=[{"field": col} for col in df_sql_games.columns],
-                            rowData=df_sql_games.to_dict("records"),
-                            defaultColDef={
-                                "minWidth": 100,
-                                "editable": True,
-                                "resizable": True,
-                                "flex": 1,
-                                "wrapHeaderText": True,
-                                "filter": True,
-                                "floatingFilter": True
-                            }
-                        ),
-                        html.H1("Film Adaptations of Video Games"),
-                        dag.AgGrid(
-                            id="ag_grid-2",
-                            columnDefs=[{"field": col} for col in df_sql_movies.columns],
-                            rowData=df_sql_movies.to_dict("records"),
-                            defaultColDef={
-                                "minWidth": 100,
-                                "editable": True,
-                                "resizable": True,
-                                "flex": 1,
-                                "wrapHeaderText": True,
-                                "filter": True,
-                                "floatingFilter": True
-                            }
+                        html.Div(
+                            [
+                                html.H1("Popular Video Games 1980 - 2023, and movie adaptions"),
+                                dag.AgGrid(
+                                    id="ag_grid",
+                                    columnDefs=[{"field": col} for col in df_sql_games.columns],
+                                    rowData=df_sql_games.to_dict("records"),
+                                    defaultColDef={
+                                        "minWidth": 100,
+                                        "editable": True,
+                                        "resizable": True,
+                                        "flex": 1,
+                                        "wrapHeaderText": True,
+                                        "filter": True,
+                                        "floatingFilter": True
+                                    },
+                                ),
+                                html.H1("Film Adaptations of Video Games"),
+                                dag.AgGrid(
+                                    id="ag_grid-2",
+                                    columnDefs=[{"field": col} for col in df_sql_movies.columns],
+                                    rowData=df_sql_movies.to_dict("records"),
+                                    defaultColDef={
+                                        "minWidth": 100,
+                                        "editable": True,
+                                        "resizable": True,
+                                        "flex": 1,
+                                        "wrapHeaderText": True,
+                                        "filter": True,
+                                        "floatingFilter": True
+                                    }
+                                ),
+                            ],
+                            style={"margin-left": "1%", "margin-right": "1%"}
                         ),
                     ]
                 )
