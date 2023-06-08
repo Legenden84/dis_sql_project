@@ -14,3 +14,5 @@
 Emma Fowler (mtf885) \
 Boris Pahhota (mpb814) \
 Tobias Legenden (jkw333)
+
+GitHub repository: https://github.com/Legenden84/dis_sql_project
